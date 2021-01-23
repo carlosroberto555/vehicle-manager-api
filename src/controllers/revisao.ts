@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import Veiculo from '../models/veiculo'
+import validate from '../utils/validate';
 
 async function create(req: Request, res: Response) {
   try {
@@ -23,13 +24,28 @@ async function create(req: Request, res: Response) {
 
 async function total_gasto(req: Request, res: Response) {
   try {
-    const veiculo = await Veiculo.findOne({ placa: req.params.placa })
-  
+    const placa = req.params.placa.toUpperCase()
+    
+    // Gera excessão se for um valor inválido
+    validate.placa(placa)
+
+    const [ veiculo ] = await Veiculo.aggregate([
+      { $match: { placa }},
+      { $unwind: '$revisoes' },
+      {
+        $group: {
+          _id: '$_id',
+          placa: { "$first": "$placa" },
+          total_gasto: { $sum: '$revisoes.valor' } 
+        }
+      }
+    ])
+
     if (!veiculo) {
-      throw new Error(`Veículo com a placa ${req.params.placa} não encontrado!`);
+      throw new Error(`A placa \`${placa}\` não possui nenhuma revisão cadastrada!`);
     }
 
-    // TODO: calcular total gasto
+    res.json({ success: true, data: veiculo})
   } catch (e) {
     res.json({ success: false, error: e.message })
   }
@@ -37,13 +53,27 @@ async function total_gasto(req: Request, res: Response) {
 
 async function total_gasto_marca(req: Request, res: Response) {
   try {
-    const veiculos = await Veiculo.find({ marca: req.params.marca })
-  
-    if (!veiculos) {
-      throw new Error(`Nenhum veículo com a marca ${req.params.marca} foi encontrado!`);
+    const marca = req.params.marca
+
+    const [ item ] = await Veiculo.aggregate([
+      { $match: { marca: new RegExp(`^${marca}$`, 'i') }},
+      { $unwind: '$revisoes' },
+      {
+        $group: {
+          _id: '$_id',
+          marca: { "$first": "$marca" },
+          total_gasto: { $sum: '$revisoes.valor' } 
+        }
+      }
+    ])
+
+    if (!item) {
+      throw new Error(`A marca \`${marca}\` não possui nenhuma revisão cadastrada!`);
+    } else {
+      delete item._id
     }
 
-    // TODO: calcular total gasto
+    res.json({ success: true, data: item})
   } catch (e) {
     res.json({ success: false, error: e.message })
   }

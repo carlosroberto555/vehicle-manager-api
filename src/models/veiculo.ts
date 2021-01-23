@@ -16,7 +16,7 @@ export interface Revisao extends Document {
   observacao: String
 }
 
-const veiculoSchema = new Schema<Veiculo>({
+const veiculoSchema = new Schema({
   placa: {
     type: String,
     unique: true,
