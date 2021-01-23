@@ -35,7 +35,13 @@ async function create(req: Request, res: Response) {
       data: await veiculo.save()
     })
   } catch (e) {
-    res.json({ success: false, error: e.message })
+    // Se for uma placa duplicada
+    if (e.code === 11000) {
+      res.status(400)
+      res.json({ success: false, error: `Já existe um veículo com a placa \`${req.body.placa}\`` })
+    } else {
+      res.json({ success: false, error: e.message })
+    }
   }
 }
 
@@ -46,6 +52,7 @@ async function read(req: Request, res: Response) {
     const veiculo = await Veiculo.findOne({ placa })
   
     if (!veiculo) {
+      res.status(404)
       throw new Error(`Veículo com a placa \`${placa}\` não encontrado!`);
     }
 
@@ -58,10 +65,16 @@ async function read(req: Request, res: Response) {
 // PUT /v1/veiculos/:placa
 async function update(req: Request, res: Response) {
   try {
+    // A placa não pode ser atualizada
+    if (req.body.placa) {
+      delete req.body.placa
+    }
+
     const placa = req.params.placa
     const veiculo = await Veiculo.findOneAndUpdate({ placa }, req.body, { new: true })
 
     if (!veiculo) {
+      res.status(404)
       throw new Error(`Veículo com a placa \`${placa}\` não encontrado!`);
     }
 

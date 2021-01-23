@@ -4,10 +4,12 @@ import Veiculo from '../models/veiculo'
 // POST /v1/veiculos/:placa/revisoes
 async function create(req: Request, res: Response) {
   try {
-    const veiculo = await Veiculo.findOne({ placa: req.params.placa })
+    const placa = req.params.placa
+    const veiculo = await Veiculo.findOne({ placa })
   
     if (!veiculo) {
-      throw new Error(`Veículo com a placa ${req.params.placa} não encontrado!`);
+      res.status(404)
+      throw new Error(`Veículo com a placa \`${placa}\` não encontrado!`);
     }
 
     // Adiciona a revisão ao veículo
@@ -25,7 +27,7 @@ async function create(req: Request, res: Response) {
 // GET /v1/veiculos/:placa/total-gasto
 async function total_gasto(req: Request, res: Response) {
   try {
-    const placa = req.params.placa.toUpperCase()
+    const placa = req.params.placa
 
     const [ veiculo ] = await Veiculo.aggregate([
       { $match: { placa }},
@@ -40,6 +42,7 @@ async function total_gasto(req: Request, res: Response) {
     ])
 
     if (!veiculo) {
+      res.status(404)
       throw new Error(`A placa \`${placa}\` não possui nenhuma revisão cadastrada!`);
     }
 
@@ -67,6 +70,7 @@ async function total_gasto_marca(req: Request, res: Response) {
     ])
 
     if (!item) {
+      res.status(404)
       throw new Error(`A marca \`${marca}\` não possui nenhuma revisão cadastrada!`);
     } else {
       delete item._id
