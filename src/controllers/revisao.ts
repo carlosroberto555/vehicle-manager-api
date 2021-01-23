@@ -29,24 +29,23 @@ async function total_gasto(req: Request, res: Response) {
   try {
     const placa = req.params.placa
 
-    const [ veiculo ] = await Veiculo.aggregate([
+    const [ data ] = await Veiculo.aggregate([
       { $match: { placa }},
       { $unwind: '$revisoes' },
       {
         $group: {
-          _id: '$_id',
-          placa: { "$first": "$placa" },
+          _id: '$placa',
           total_gasto: { $sum: '$revisoes.valor' } 
         }
       }
     ])
 
-    if (!veiculo) {
+    if (!data) {
       res.status(404)
       throw new Error(`A placa \`${placa}\` não possui nenhuma revisão cadastrada!`);
     }
 
-    res.json({ success: true, data: veiculo})
+    res.json({ success: true, data })
   } catch (e) {
     res.json({ success: false, error: e.message })
   }
@@ -57,26 +56,23 @@ async function total_gasto_marca(req: Request, res: Response) {
   try {
     const marca = req.params.marca
 
-    const [ item ] = await Veiculo.aggregate([
+    const [ data ] = await Veiculo.aggregate([
       { $match: { marca: new RegExp(`^${marca}$`, 'i') }},
       { $unwind: '$revisoes' },
       {
         $group: {
-          _id: '$_id',
-          marca: { "$first": "$marca" },
+          _id: '$marca',
           total_gasto: { $sum: '$revisoes.valor' } 
         }
       }
     ])
 
-    if (!item) {
+    if (!data) {
       res.status(404)
       throw new Error(`A marca \`${marca}\` não possui nenhuma revisão cadastrada!`);
-    } else {
-      delete item._id
     }
 
-    res.json({ success: true, data: item})
+    res.json({ success: true, data })
   } catch (e) {
     res.json({ success: false, error: e.message })
   }
