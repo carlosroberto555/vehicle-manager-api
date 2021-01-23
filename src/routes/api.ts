@@ -10,7 +10,7 @@ const router = express.Router()
 router.get('/', (req, res) => res.json({
   name: 'Vehicle Manager API',
   version: '1.0.0',
-  docs: req.path + '/docs'
+  docs: req.protocol + '://' + req.get('host') + req.originalUrl + '/docs'
 }))
 
 // Endpoints de CRUD de veículos
