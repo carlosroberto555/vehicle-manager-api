@@ -10,6 +10,7 @@ function placa(req: Request, res: Response, next: Function) {
     // Vai para o próximo midleware
     next()
   } else {
+    res.status(400)
     res.json({ success: false, error: `A placa \`${placa}\` não é válida!` })
   }
 }
