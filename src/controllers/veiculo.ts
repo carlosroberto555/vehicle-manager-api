@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import Veiculo from '../models/veiculo'
 
+// GET /v1/veiculos
 async function list(req: Request, res: Response) {
   const query: any = {}
 
@@ -24,6 +25,7 @@ async function list(req: Request, res: Response) {
   }
 }
 
+// POST /v1/veiculos
 async function create(req: Request, res: Response) {
   try {
     const veiculo = new Veiculo(req.body)
@@ -37,43 +39,44 @@ async function create(req: Request, res: Response) {
   }
 }
 
+// GET /v1/veiculos/:placa
 async function read(req: Request, res: Response) {
   try {
-    const veiculo = await Veiculo.findOne({ placa: req.params.placa })
+    const placa = req.params.placa
+    const veiculo = await Veiculo.findOne({ placa })
   
     if (!veiculo) {
-      throw new Error(`Veículo com a placa ${req.params.placa} não encontrado!`);
+      throw new Error(`Veículo com a placa \`${placa}\` não encontrado!`);
     }
 
-    res.json({
-      success: true,
-      data: veiculo
-    })
+    res.json({ success: true, data: veiculo })
   } catch (e) {
     res.json({ success: false, error: e.message })
   }
 }
 
+// PUT /v1/veiculos/:placa
 async function update(req: Request, res: Response) {
   try {
-    const veiculo = await Veiculo.findOneAndUpdate({ placa: req.params.placa }, req.body, { new: true })
+    const placa = req.params.placa
+    const veiculo = await Veiculo.findOneAndUpdate({ placa }, req.body, { new: true })
 
     if (!veiculo) {
-      throw new Error(`Veículo com a placa ${req.params.placa} não encontrado!`);
+      throw new Error(`Veículo com a placa \`${placa}\` não encontrado!`);
     }
 
-    res.json({
-      success: true,
-      data: veiculo
-    })
+    res.json({ success: true, data: veiculo })
   } catch (e) {
     res.json({ success: false, error: e.message })
   }
 }
 
+// DELETE /v1/veiculos/:placa
 async function remove(req: Request, res: Response) {
   try {
-    await Veiculo.deleteOne({ placa: req.params.placa }, req.body)
+    const placa = req.params.placa
+    await Veiculo.deleteOne({ placa }, req.body)
+
     res.json({ success: true })
   } catch (e) {
     res.json({ success: false, error: e.message })

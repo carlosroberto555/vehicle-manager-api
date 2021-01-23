@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import Veiculo from '../models/veiculo'
-import validate from '../utils/validate';
 
+// POST /v1/veiculos/:placa/revisoes
 async function create(req: Request, res: Response) {
   try {
     const veiculo = await Veiculo.findOne({ placa: req.params.placa })
@@ -22,12 +22,10 @@ async function create(req: Request, res: Response) {
   }
 }
 
+// GET /v1/veiculos/:placa/total-gasto
 async function total_gasto(req: Request, res: Response) {
   try {
     const placa = req.params.placa.toUpperCase()
-    
-    // Gera excessão se for um valor inválido
-    validate.placa(placa)
 
     const [ veiculo ] = await Veiculo.aggregate([
       { $match: { placa }},
@@ -51,6 +49,7 @@ async function total_gasto(req: Request, res: Response) {
   }
 }
 
+// GET /v1/marca/:marca/total-gasto
 async function total_gasto_marca(req: Request, res: Response) {
   try {
     const marca = req.params.marca
