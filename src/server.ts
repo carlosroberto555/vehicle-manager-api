@@ -19,5 +19,10 @@ app.use('/v1', apiRoute)
 // Documentação da API versão 1.0
 app.use('/v1/docs', express.static(path.join(__dirname, '../docs')));
 
+// Redireciona a raiz para /v1
+app.get('/', (req, res) => {
+  res.redirect('/v1')
+})
+
 // Listen on port 3000 or any other passed from argument
 app.listen(process.env.PORT || 3000)
